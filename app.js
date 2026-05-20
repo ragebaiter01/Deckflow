@@ -8,6 +8,7 @@ const themeLibrary = {
     id: "midnight",
     name: "Midnight Blue",
     background: "linear-gradient(135deg, #0d1628 0%, #0a1220 45%, #10294a 100%)",
+    bgColor: "#0d1628",
     accent: "#4db3ff",
     secondary: "#245dff",
     text: "#f6f9ff",
@@ -19,6 +20,7 @@ const themeLibrary = {
     id: "graphite",
     name: "Graphite Pulse",
     background: "linear-gradient(135deg, #090c12 0%, #101625 55%, #16233d 100%)",
+    bgColor: "#090c12",
     accent: "#79b7ff",
     secondary: "#2f67ff",
     text: "#f4f7ff",
@@ -30,6 +32,7 @@ const themeLibrary = {
     id: "electric",
     name: "Electric Depth",
     background: "linear-gradient(135deg, #050914 0%, #0c1630 52%, #12386b 100%)",
+    bgColor: "#050914",
     accent: "#78d8ff",
     secondary: "#1d8dff",
     text: "#f7fbff",
@@ -44,6 +47,10 @@ const transitionModes = [
   { id: "fade", label: "Fade" },
   { id: "push", label: "Push" },
   { id: "zoom", label: "Zoom" },
+  { id: "wipe", label: "Wipe" },
+  { id: "flip", label: "Flip" },
+  { id: "reveal", label: "Reveal" },
+  { id: "blur", label: "Blur" },
   { id: "none", label: "Ohne" }
 ];
 
@@ -53,7 +60,7 @@ const transitionDurations = [
   { value: 980, label: "Lang" }
 ];
 
-const textFontOptions = ["Sora", "Manrope", "Outfit", "Space Grotesk"];
+const textFontOptions = ["Calibri", "Arial", "Helvetica", "Tahoma", "Verdana", "Georgia", "Times New Roman", "Garamond", "Sora", "Manrope", "Outfit", "Space Grotesk"];
 const shapeTypeOptions = [
   { id: "rounded", label: "Abgerundet" },
   { id: "square", label: "Rechteck" },
@@ -89,6 +96,7 @@ const el = {
   presentationCounter: document.getElementById("presentationCounter"),
   imageInput: document.getElementById("imageInput"),
   replaceImageInput: document.getElementById("replaceImageInput"),
+  shapeTextureInput: document.getElementById("shapeTextureInput"),
   importInput: document.getElementById("importInput"),
   addSlideBtn: document.getElementById("addSlideBtn"),
   deleteSlideBtn: document.getElementById("deleteSlideBtn"),
@@ -98,7 +106,10 @@ const el = {
   addImageBtn: document.getElementById("addImageBtn"),
   importDeckBtn: document.getElementById("importDeckBtn"),
   exportDeckBtn: document.getElementById("exportDeckBtn"),
+  exportPdfBtn: document.getElementById("exportPdfBtn"),
+  exportPptxBtn: document.getElementById("exportPptxBtn"),
   presentBtn: document.getElementById("presentBtn"),
+  ribbonToggleBtn: document.getElementById("ribbonToggleBtn"),
   closeImageEditorBtn: document.getElementById("closeImageEditorBtn"),
   closePresentationBtn: document.getElementById("closePresentationBtn"),
   prevPresentationBtn: document.getElementById("prevPresentationBtn"),
@@ -118,15 +129,18 @@ const el = {
   alignRightBtn: document.getElementById("alignRightBtn")
 };
 const quickShapeButtons = Array.from(document.querySelectorAll("[data-quick-shape]"));
+const quickTransitionButtons = Array.from(document.querySelectorAll("[data-quick-transition]"));
 
 const state = hydrateDeck(loadState() || createDefaultDeck());
 const uiState = {
   activeShapeType: "rounded",
   defaultRadius: 26,
   zoom: 1,
+  ribbonCollapsed: false,
   slideContext: { open: false, slideId: null, x: 0, y: 0 },
   imageEditor: { open: false, elementId: null, x: 0, y: 0 },
-  pendingReplaceImageId: null
+  pendingReplaceImageId: null,
+  pendingShapeTextureId: null
 };
 
 let editingElementId = null;
@@ -168,7 +182,7 @@ function createDefaultDeck() {
         content: "DeckFlow Studio",
         fontSize: 60,
         color: "#f8fbff",
-        fontFamily: "Sora"
+        fontFamily: "Arial"
       }),
       createElement("text", {
         x: 96,
@@ -178,7 +192,7 @@ function createDefaultDeck() {
         content: "Moderner PowerPoint-Klon mit schwarzem Design, blauem Akzent, Start-Leiste, Morph-Übergängen und Bild-Editor per Rechtsklick.",
         fontSize: 28,
         color: "#c8d8f7",
-        fontFamily: "Manrope"
+        fontFamily: "Calibri"
       }),
       createElement("shape", {
         x: 876,
@@ -211,7 +225,7 @@ function createDefaultDeck() {
         fontWeight: 800,
         color: "#7fd3ff",
         align: "center",
-        fontFamily: "Outfit"
+        fontFamily: "Arial"
       })
     ]
   });
@@ -229,7 +243,7 @@ function createDefaultDeck() {
         h: 96,
         content: "Agenda",
         fontSize: 52,
-        fontFamily: "Sora"
+        fontFamily: "Arial"
       }),
       createElement("shape", {
         x: 82,
@@ -247,7 +261,7 @@ function createDefaultDeck() {
         content: "1. Start-Leiste für Schriftart, Größe, Farbe und Ausrichtung\n2. Rechtsklick-Menü links für Duplizieren, Umbenennen und Löschen\n3. Formen mit nachträglicher Abrundung\n4. Bild-Editor mit Helligkeit, Kontrast, Transparenz, Schärfe und Form-Masken",
         fontSize: 31,
         lineHeight: 1.42,
-        fontFamily: "Manrope"
+        fontFamily: "Calibri"
       })
     ]
   });
@@ -288,11 +302,12 @@ function createElement(type, overrides = {}) {
     color: "#f5f8ff",
     fontSize: type === "title" ? 52 : 28,
     fontWeight: type === "title" ? 800 : 600,
-    fontFamily: type === "title" ? "Sora" : "Manrope",
+    fontFamily: type === "title" ? "Arial" : "Calibri",
     lineHeight: 1.25,
     align: "left",
     fit: "cover",
     src: "",
+    textureSrc: "",
     shapeType: "rounded",
     maskShape: "rounded",
     adjustments: createDefaultAdjustments()
@@ -494,6 +509,10 @@ function render() {
   renderImageEditor();
   updateToolbarState();
   renderZoomState();
+  document.querySelector(".ppt-ribbon")?.classList.toggle("collapsed", uiState.ribbonCollapsed);
+  if (el.ribbonToggleBtn) {
+    el.ribbonToggleBtn.textContent = uiState.ribbonCollapsed ? "Menüband aufklappen" : "Menüband einklappen";
+  }
 }
 
 function updateToolbarState() {
@@ -521,7 +540,7 @@ function renderRibbon() {
   el.alignCenterBtn.disabled = !textSelected;
   el.alignRightBtn.disabled = !textSelected;
 
-  el.fontFamilyControl.value = textSelected ? element.fontFamily || "Manrope" : "Sora";
+  el.fontFamilyControl.value = textSelected ? element.fontFamily || "Calibri" : "Calibri";
   el.fontSizeControl.value = textSelected ? element.fontSize : 32;
   el.fontWeightControl.value = textSelected ? String(element.fontWeight || 600) : "600";
   el.lineHeightControl.value = textSelected ? Number(element.lineHeight || 1.25).toFixed(2) : "1.20";
@@ -535,6 +554,9 @@ function renderRibbon() {
   el.cornerRadiusControl.value = Math.round(radiusTarget || 0);
   quickShapeButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.quickShape === shapeTarget);
+  });
+  quickTransitionButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.quickTransition === getCurrentSlide().transition);
   });
 }
 
@@ -634,6 +656,13 @@ function createElementNode(element, slide, options = {}) {
     shape.style.background = element.fill || theme.shapeFill;
     shape.style.border = `1px solid ${element.stroke || theme.shapeStroke}`;
     applyClipShape(shape, element.shapeType || "rounded", (element.radius || 0) * scale);
+    if (element.textureSrc) {
+      const texture = document.createElement("img");
+      texture.className = "shape-texture";
+      texture.src = element.textureSrc;
+      texture.alt = "";
+      shape.appendChild(texture);
+    }
     node.appendChild(shape);
   } else if (element.type === "image") {
     const image = document.createElement("img");
@@ -651,7 +680,7 @@ function createElementNode(element, slide, options = {}) {
     text.style.fontWeight = element.fontWeight;
     text.style.lineHeight = element.lineHeight;
     text.style.textAlign = element.align;
-    text.style.fontFamily = `"${element.fontFamily || (element.type === "title" ? "Sora" : "Manrope")}", sans-serif`;
+    text.style.fontFamily = `"${element.fontFamily || (element.type === "title" ? "Arial" : "Calibri")}", sans-serif`;
     text.innerHTML = formatContentForHtml(element.content);
 
     if (interactive && isEditing) {
@@ -1010,7 +1039,7 @@ function addElement(type, extra = {}) {
       h: 112,
       color: theme.text,
       content: "Neuer Titel",
-      fontFamily: "Sora"
+      fontFamily: "Arial"
     },
     text: {
       x: 104,
@@ -1019,7 +1048,7 @@ function addElement(type, extra = {}) {
       h: 170,
       color: theme.muted,
       content: "Text hier bearbeiten",
-      fontFamily: "Manrope"
+      fontFamily: "Calibri"
     },
     shape: {
       x: 820,
@@ -1234,6 +1263,145 @@ function setZoom(nextZoom) {
   renderZoomState();
 }
 
+function slugifyFileName(name, fallback = "deckflow-deck") {
+  return (name || fallback).toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || fallback;
+}
+
+function hexForPpt(value, fallback = "#0d1628") {
+  return normalizeColor(value || fallback).replace("#", "").toUpperCase();
+}
+
+function renderSlideForExport(slide) {
+  const host = document.createElement("div");
+  host.style.position = "fixed";
+  host.style.left = "-10000px";
+  host.style.top = "0";
+  host.style.width = `${SLIDE_WIDTH}px`;
+  host.style.height = `${SLIDE_HEIGHT}px`;
+  host.style.pointerEvents = "none";
+  host.style.zIndex = "-1";
+  const scene = createScene(slide, { interactive: false, sceneScale: 1 });
+  scene.style.transform = "none";
+  host.appendChild(scene);
+  document.body.appendChild(host);
+  return { host, scene };
+}
+
+async function exportPdf() {
+  if (!window.html2canvas || !window.jspdf?.jsPDF) {
+    setStatus("PDF-Export ist noch nicht bereit.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [SLIDE_WIDTH, SLIDE_HEIGHT] });
+
+  for (let index = 0; index < state.slides.length; index += 1) {
+    const slide = state.slides[index];
+    const { host, scene } = renderSlideForExport(slide);
+    const canvas = await window.html2canvas(scene, {
+      backgroundColor: null,
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+    document.body.removeChild(host);
+    const imageData = canvas.toDataURL("image/png");
+    if (index > 0) {
+      pdf.addPage([SLIDE_WIDTH, SLIDE_HEIGHT], "landscape");
+    }
+    pdf.addImage(imageData, "PNG", 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT);
+  }
+
+  pdf.save(`${slugifyFileName(state.title)}.pdf`);
+  setStatus("Präsentation als PDF exportiert.");
+}
+
+function pxToIn(value) {
+  return value / 96;
+}
+
+function shapeTypeToPpt(shapeType) {
+  const map = {
+    rounded: "roundRect",
+    square: "rect",
+    circle: "ellipse",
+    diamond: "diamond",
+    hexagon: "hexagon",
+    ticket: "roundRect"
+  };
+  return map[shapeType] || "rect";
+}
+
+async function exportPptx() {
+  if (!window.PptxGenJS) {
+    setStatus("PPTX-Export ist noch nicht bereit.");
+    return;
+  }
+
+  const pptx = new window.PptxGenJS();
+  pptx.layout = "LAYOUT_WIDE";
+  pptx.author = "OpenAI Codex";
+  pptx.company = "DeckFlow Studio";
+  pptx.subject = state.title;
+  pptx.title = state.title;
+  pptx.lang = "de-DE";
+
+  state.slides.forEach((slideData) => {
+    const slide = pptx.addSlide();
+    const theme = currentTheme(slideData);
+    slide.background = { color: hexForPpt(theme.bgColor, "#0d1628") };
+
+    slideData.elements.forEach((element) => {
+      const x = pxToIn(element.x);
+      const y = pxToIn(element.y);
+      const w = pxToIn(element.w);
+      const h = pxToIn(element.h);
+
+      if (element.type === "title" || element.type === "text") {
+        slide.addText(element.content || "", {
+          x,
+          y,
+          w,
+          h,
+          margin: 0.06,
+          breakLine: false,
+          fontFace: element.fontFamily || (element.type === "title" ? "Arial" : "Calibri"),
+          fontSize: Math.max(8, Math.round((element.fontSize || 28) * 0.75)),
+          bold: Number(element.fontWeight || 600) >= 700,
+          color: hexForPpt(element.color, theme.text),
+          align: element.align || "left",
+          valign: "mid",
+          fit: "shrink"
+        });
+        return;
+      }
+
+      if (element.type === "shape") {
+        slide.addShape(shapeTypeToPpt(element.shapeType), {
+          x,
+          y,
+          w,
+          h,
+          fill: { color: hexForPpt(extractColor(element.fill || theme.shapeFill, theme.accent), theme.accent), transparency: 6 },
+          line: { color: hexForPpt(extractColor(element.stroke || theme.shapeStroke, theme.accent), theme.accent), transparency: 0 }
+        });
+        if (element.textureSrc) {
+          slide.addImage({ data: element.textureSrc, x, y, w, h });
+        }
+        return;
+      }
+
+      if (element.type === "image" && element.src) {
+        slide.addImage({ data: element.src, x, y, w, h });
+      }
+    });
+  });
+
+  await pptx.writeFile({ fileName: `${slugifyFileName(state.title)}.pptx` });
+  setStatus("Präsentation als PPTX exportiert.");
+}
+
 function exportDeck() {
   const payload = JSON.stringify(state, null, 2);
   const blob = new Blob([payload], { type: "application/json" });
@@ -1268,7 +1436,7 @@ function importDeck(file) {
   reader.readAsText(file);
 }
 
-function addImageFromFile(file, targetElementId = null) {
+function addImageFromFile(file, targetElementId = null, position = null) {
   const reader = new FileReader();
   reader.onload = () => {
     if (targetElementId) {
@@ -1281,9 +1449,11 @@ function addImageFromFile(file, targetElementId = null) {
       }
       return;
     }
+    const startX = position ? position.x : 760;
+    const startY = position ? position.y : 148;
     const imageElement = createElement("image", {
-      x: 760,
-      y: 148,
+      x: startX,
+      y: startY,
       w: 360,
       h: 260,
       src: reader.result,
@@ -1296,6 +1466,21 @@ function addImageFromFile(file, targetElementId = null) {
     queueSave();
     render();
     setStatus("Bild eingefügt.");
+  };
+  reader.readAsDataURL(file);
+}
+
+function addShapeTextureFromFile(file, targetElementId) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const element = getCurrentSlide().elements.find((item) => item.id === targetElementId);
+    if (!element || element.type !== "shape") {
+      return;
+    }
+    element.textureSrc = reader.result;
+    queueSave();
+    render();
+    setStatus("Formtextur gesetzt.");
   };
   reader.readAsDataURL(file);
 }
@@ -1425,7 +1610,13 @@ el.addShapeBtn.addEventListener("click", () => addElement("shape"));
 el.addImageBtn.addEventListener("click", () => el.imageInput.click());
 el.importDeckBtn.addEventListener("click", () => el.importInput.click());
 el.exportDeckBtn.addEventListener("click", exportDeck);
+el.exportPdfBtn.addEventListener("click", exportPdf);
+el.exportPptxBtn.addEventListener("click", exportPptx);
 el.presentBtn.addEventListener("click", beginPresentation);
+el.ribbonToggleBtn.addEventListener("click", () => {
+  uiState.ribbonCollapsed = !uiState.ribbonCollapsed;
+  render();
+});
 el.closeImageEditorBtn.addEventListener("click", closeImageEditor);
 el.closePresentationBtn.addEventListener("click", closePresentation);
 el.prevPresentationBtn.addEventListener("click", () => goToPresentationSlide(presentationIndex - 1));
@@ -1458,6 +1649,15 @@ quickShapeButtons.forEach((button) => {
     renderRibbon();
   });
 });
+quickTransitionButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const slide = getCurrentSlide();
+    slide.transition = button.dataset.quickTransition;
+    queueSave();
+    render();
+    setStatus(`Übergang auf ${transitionModes.find((item) => item.id === slide.transition)?.label || "Morph"} gesetzt.`);
+  });
+});
 el.cornerRadiusControl.addEventListener("input", (event) => {
   uiState.defaultRadius = Number(event.target.value);
   const element = getSelectedElement();
@@ -1483,6 +1683,15 @@ el.replaceImageInput.addEventListener("change", (event) => {
     addImageFromFile(file, uiState.pendingReplaceImageId);
   }
   uiState.pendingReplaceImageId = null;
+  event.target.value = "";
+});
+
+el.shapeTextureInput.addEventListener("change", (event) => {
+  const [file] = event.target.files || [];
+  if (file && uiState.pendingShapeTextureId) {
+    addShapeTextureFromFile(file, uiState.pendingShapeTextureId);
+  }
+  uiState.pendingShapeTextureId = null;
   event.target.value = "";
 });
 
@@ -1627,6 +1836,10 @@ el.stageCanvas.addEventListener("contextmenu", (event) => {
   if (selected.type === "image") {
     event.preventDefault();
     showImageEditor(selected.id, event.clientX + 10, event.clientY + 10);
+  } else if (selected.type === "shape") {
+    event.preventDefault();
+    uiState.pendingShapeTextureId = selected.id;
+    el.shapeTextureInput.click();
   }
 });
 
@@ -1649,6 +1862,27 @@ el.stageCanvas.addEventListener("wheel", (event) => {
   const delta = event.deltaY > 0 ? -0.08 : 0.08;
   setZoom(uiState.zoom + delta);
 }, { passive: false });
+
+el.stageCanvas.addEventListener("dragover", (event) => {
+  const hasImage = Array.from(event.dataTransfer?.items || []).some((item) => item.kind === "file" && item.type.startsWith("image/"));
+  if (!hasImage) {
+    return;
+  }
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
+});
+
+el.stageCanvas.addEventListener("drop", (event) => {
+  const files = Array.from(event.dataTransfer?.files || []).filter((file) => file.type.startsWith("image/"));
+  if (!files.length) {
+    return;
+  }
+  event.preventDefault();
+  const point = pointToSlideCoordinates(event.clientX, event.clientY);
+  const imageX = Math.round(point.x - 180);
+  const imageY = Math.round(point.y - 130);
+  addImageFromFile(files[0], null, { x: imageX, y: imageY });
+});
 
 el.stageCanvas.addEventListener("input", (event) => {
   const editable = event.target.closest('[data-editable="true"]');

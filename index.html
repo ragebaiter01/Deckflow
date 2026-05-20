@@ -34,7 +34,9 @@
 
       <div class="toolbar-cluster">
         <button class="ghost-button" id="importDeckBtn">Import</button>
-        <button class="ghost-button" id="exportDeckBtn">Export</button>
+        <button class="ghost-button" id="exportDeckBtn">JSON</button>
+        <button class="ghost-button" id="exportPdfBtn">PDF</button>
+        <button class="ghost-button" id="exportPptxBtn">PPTX</button>
         <button class="primary-button" id="presentBtn">Präsentieren</button>
       </div>
     </header>
@@ -49,6 +51,7 @@
           <button class="ribbon-tab" type="button">Übergänge</button>
           <button class="ribbon-tab" type="button">Bildformat</button>
         </div>
+        <button id="ribbonToggleBtn" class="ghost-button ribbon-toggle" type="button">Menüband einklappen</button>
       </div>
 
       <div class="ppt-ribbon__body">
@@ -56,6 +59,14 @@
           <span class="ribbon-label">Start</span>
           <div class="ribbon-controls">
             <select id="fontFamilyControl" class="ribbon-input" aria-label="Schriftart">
+              <option value="Calibri">Calibri</option>
+              <option value="Arial">Arial</option>
+              <option value="Helvetica">Helvetica</option>
+              <option value="Tahoma">Tahoma</option>
+              <option value="Verdana">Verdana</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Garamond">Garamond</option>
               <option value="Sora">Sora</option>
               <option value="Manrope">Manrope</option>
               <option value="Outfit">Outfit</option>
@@ -232,6 +243,7 @@
 
   <input id="imageInput" type="file" accept="image/*" hidden />
   <input id="replaceImageInput" type="file" accept="image/*" hidden />
+  <input id="shapeTextureInput" type="file" accept="image/*" hidden />
   <input id="importInput" type="file" accept="application/json,.json" hidden />
 
   <svg class="filter-defs" aria-hidden="true" focusable="false">
@@ -248,6 +260,9 @@
     </defs>
   </svg>
 
+  <script src="vendor/html2canvas.min.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/pptxgen.bundle.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
