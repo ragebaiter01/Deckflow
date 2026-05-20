@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeckFlow Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Sora:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="brand-mark">DF</div>
+        <div>
+          <p class="eyebrow">Presentation Suite</p>
+          <input id="deckTitle" class="deck-title-input" type="text" value="DeckFlow Studio" aria-label="Präsentationstitel" />
+        </div>
+      </div>
+
+      <div class="toolbar-cluster">
+        <button class="ghost-button" id="addSlideBtn">Neue Folie</button>
+        <button class="ghost-button danger-soft" id="deleteSlideBtn">Folie löschen</button>
+      </div>
+
+      <div class="toolbar-cluster toolbar-cluster--accent">
+        <button class="tool-button" id="addTitleBtn">Titel</button>
+        <button class="tool-button" id="addTextBtn">Text</button>
+        <button class="tool-button" id="addShapeBtn">Form</button>
+        <button class="tool-button" id="addImageBtn">Bild</button>
+      </div>
+
+      <div class="toolbar-cluster">
+        <button class="ghost-button" id="importDeckBtn">Import</button>
+        <button class="ghost-button" id="exportDeckBtn">Export</button>
+        <button class="primary-button" id="presentBtn">Präsentieren</button>
+      </div>
+    </header>
+
+    <section class="ppt-ribbon glass-panel">
+      <div class="ppt-ribbon__head">
+        <div class="ppt-ribbon__title">Menüband</div>
+        <div class="ppt-ribbon__tabs" aria-label="Ribbon-Bereiche">
+          <button class="ribbon-tab active" type="button">Start</button>
+          <button class="ribbon-tab" type="button">Einfügen</button>
+          <button class="ribbon-tab" type="button">Formen</button>
+          <button class="ribbon-tab" type="button">Übergänge</button>
+          <button class="ribbon-tab" type="button">Bildformat</button>
+        </div>
+      </div>
+
+      <div class="ppt-ribbon__body">
+        <section class="ribbon-panel ribbon-panel--start">
+          <span class="ribbon-label">Start</span>
+          <div class="ribbon-controls">
+            <select id="fontFamilyControl" class="ribbon-input" aria-label="Schriftart">
+              <option value="Sora">Sora</option>
+              <option value="Manrope">Manrope</option>
+              <option value="Outfit">Outfit</option>
+              <option value="Space Grotesk">Space Grotesk</option>
+            </select>
+            <input id="fontSizeControl" class="ribbon-input ribbon-input--compact" type="number" min="12" max="120" value="32" aria-label="Schriftgröße" />
+            <select id="fontWeightControl" class="ribbon-input ribbon-input--compact" aria-label="Schriftstärke">
+              <option value="500">500</option>
+              <option value="600">600</option>
+              <option value="700">700</option>
+              <option value="800">800</option>
+            </select>
+            <input id="lineHeightControl" class="ribbon-input ribbon-input--compact" type="number" min="1" max="2" step="0.05" value="1.2" aria-label="Zeilenhöhe" />
+            <input id="fontColorControl" class="ribbon-color" type="color" value="#f5f8ff" aria-label="Textfarbe" />
+          </div>
+          <div class="ribbon-controls">
+            <button id="alignLeftBtn" class="mini-button" type="button">Links</button>
+            <button id="alignCenterBtn" class="mini-button" type="button">Mitte</button>
+            <button id="alignRightBtn" class="mini-button" type="button">Rechts</button>
+          </div>
+        </section>
+
+        <section class="ribbon-panel ribbon-panel--colors">
+          <span class="ribbon-label">Farben</span>
+          <div class="color-grid">
+            <label class="color-control">
+              <span>Schrift</span>
+              <input id="textColorControl" class="ribbon-color" type="color" value="#f5f8ff" aria-label="Schriftfarbe" />
+            </label>
+            <label class="color-control">
+              <span>Text-Füllung</span>
+              <input id="textFillColorControl" class="ribbon-color" type="color" value="#0b1730" aria-label="Textfüllfarbe" />
+            </label>
+            <label class="color-control">
+              <span>Text-Kontur</span>
+              <input id="textStrokeColorControl" class="ribbon-color" type="color" value="#4db3ff" aria-label="Textkonturfarbe" />
+            </label>
+            <label class="color-control">
+              <span>Form-Füllung</span>
+              <input id="shapeFillColorControl" class="ribbon-color" type="color" value="#4db3ff" aria-label="Formfüllfarbe" />
+            </label>
+            <label class="color-control">
+              <span>Form-Kontur</span>
+              <input id="shapeStrokeColorControl" class="ribbon-color" type="color" value="#a0d0ff" aria-label="Formkonturfarbe" />
+            </label>
+          </div>
+        </section>
+
+        <section class="ribbon-panel ribbon-panel--shapes">
+          <span class="ribbon-label">Formen</span>
+          <div class="shape-grid">
+            <button class="shape-chip" type="button" data-quick-shape="rounded">Abgerundet</button>
+            <button class="shape-chip" type="button" data-quick-shape="square">Rechteck</button>
+            <button class="shape-chip" type="button" data-quick-shape="circle">Kreis</button>
+            <button class="shape-chip" type="button" data-quick-shape="diamond">Diamant</button>
+            <button class="shape-chip" type="button" data-quick-shape="hexagon">Hexagon</button>
+            <button class="shape-chip" type="button" data-quick-shape="ticket">Ticket</button>
+          </div>
+          <div class="ribbon-controls">
+            <select id="shapePresetControl" class="ribbon-input" aria-label="Formtyp">
+              <option value="rounded">Abgerundet</option>
+              <option value="square">Rechteck</option>
+              <option value="circle">Kreis</option>
+              <option value="diamond">Diamant</option>
+              <option value="hexagon">Hexagon</option>
+              <option value="ticket">Ticket</option>
+            </select>
+            <input id="cornerRadiusControl" class="ribbon-range" type="range" min="0" max="80" value="26" aria-label="Eckenradius" />
+          </div>
+        </section>
+
+        <section class="ribbon-panel ribbon-panel--transitions">
+          <span class="ribbon-label">Übergänge</span>
+          <div class="transition-grid">
+            <button class="transition-chip" type="button" data-quick-transition="morph">Morph</button>
+            <button class="transition-chip" type="button" data-quick-transition="fade">Fade</button>
+            <button class="transition-chip" type="button" data-quick-transition="push">Push</button>
+            <button class="transition-chip" type="button" data-quick-transition="zoom">Zoom</button>
+            <button class="transition-chip" type="button" data-quick-transition="wipe">Wipe</button>
+            <button class="transition-chip" type="button" data-quick-transition="flip">Flip</button>
+            <button class="transition-chip" type="button" data-quick-transition="reveal">Reveal</button>
+            <button class="transition-chip" type="button" data-quick-transition="blur">Blur</button>
+            <button class="transition-chip" type="button" data-quick-transition="none">Ohne</button>
+          </div>
+        </section>
+
+        <section class="ribbon-panel ribbon-panel--hint">
+          <span class="ribbon-label">Hinweis</span>
+          <p class="ribbon-hint">Rechtsklick links auf eine Folie für Duplizieren. Rechtsklick auf Bild oder Form öffnet den Objekt-Editor.</p>
+        </section>
+      </div>
+    </section>
+
+    <main class="workspace">
+      <aside class="sidebar glass-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Folien</p>
+            <h2>Storyboard</h2>
+          </div>
+          <span id="slideCount" class="panel-badge">0</span>
+        </div>
+
+        <div id="slideList" class="slide-list" aria-label="Folienliste"></div>
+      </aside>
+
+      <section class="editor-area">
+        <div class="stage-meta glass-panel">
+          <div>
+            <p class="eyebrow">Arbeitsfläche</p>
+            <h2 id="activeSlideName">Folie 1</h2>
+          </div>
+          <div class="stage-meta__actions">
+            <span class="panel-badge">16:9</span>
+            <span id="transitionBadge" class="panel-badge">Morph · 680 ms</span>
+            <div class="zoom-controls">
+              <button id="zoomOutBtn" class="mini-button" type="button">-</button>
+              <button id="zoomResetBtn" class="mini-button" type="button">100%</button>
+              <button id="zoomInBtn" class="mini-button" type="button">+</button>
+            </div>
+            <span id="autosaveState" class="save-indicator">Autosave aktiv</span>
+          </div>
+        </div>
+
+        <div class="stage-wrap">
+          <div class="stage-frame">
+            <div id="stageCanvas" class="stage-canvas" aria-label="Präsentationsfolie"></div>
+          </div>
+        </div>
+
+        <div class="statusbar glass-panel">
+          <span id="statusText">Bereit. Doppelklick auf Text zum Bearbeiten, Ziehen zum Verschieben.</span>
+          <span class="status-shortcuts">Entf: Element löschen · Strg/Cmd+D: Folie duplizieren · Strg/Cmd+S: Export</span>
+        </div>
+      </section>
+
+      <aside class="inspector glass-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Eigenschaften</p>
+            <h2>Inspector</h2>
+          </div>
+        </div>
+
+        <div id="inspectorContent" class="inspector-content"></div>
+      </aside>
+    </main>
+  </div>
+
+  <div id="slideContextMenu" class="context-menu hidden" aria-hidden="true"></div>
+
+  <div id="imageEditorPanel" class="floating-editor hidden" aria-hidden="true">
+    <div class="floating-editor__head">
+      <div>
+        <p class="eyebrow">Bild-Editor</p>
+        <h3>Filter und Form</h3>
+      </div>
+      <button id="closeImageEditorBtn" class="floating-close" type="button">Schließen</button>
+    </div>
+    <div id="imageEditorContent" class="floating-editor__content"></div>
+  </div>
+
+  <div id="presentationOverlay" class="presentation-overlay hidden" aria-hidden="true">
+    <button id="closePresentationBtn" class="presentation-close" aria-label="Präsentation schließen">Schließen</button>
+    <div class="presentation-shell">
+      <div id="presentationStage" class="presentation-stage"></div>
+    </div>
+    <div class="presentation-controls">
+      <button id="prevPresentationBtn" class="ghost-button">Zurück</button>
+      <span id="presentationCounter">1 / 1</span>
+      <button id="nextPresentationBtn" class="primary-button">Weiter</button>
+    </div>
+  </div>
+
+  <input id="imageInput" type="file" accept="image/*" hidden />
+  <input id="replaceImageInput" type="file" accept="image/*" hidden />
+  <input id="importInput" type="file" accept="application/json,.json" hidden />
+
+  <svg class="filter-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="sharpen-soft">
+        <feConvolveMatrix order="3" kernelMatrix="0 -1 0 -1 5 -1 0 -1 0" divisor="1" />
+      </filter>
+      <filter id="sharpen-medium">
+        <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 9 -1 -1 -1 -1" divisor="1" />
+      </filter>
+      <filter id="sharpen-strong">
+        <feConvolveMatrix order="3" kernelMatrix="-1 -2 -1 -2 13 -2 -1 -2 -1" divisor="1" />
+      </filter>
+    </defs>
+  </svg>
+
+  <script src="app.js"></script>
+</body>
+</html>
